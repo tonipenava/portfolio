@@ -1,0 +1,17 @@
+.menu {
+  overflow: hidden;
+  transition: height 300ms ease-in-out;
+}
+
+.menu-hidden {
+  height: 0;
+}
+
+.menu-visible {
+  height: auto;
+}
+.gradient-border {
+  border-bottom-width: 4px;
+  border-image-slice: 1;
+  border-image-source: linear-gradient(to right, #9d4edd, #ff56a1, #ff2b2b);
+}
