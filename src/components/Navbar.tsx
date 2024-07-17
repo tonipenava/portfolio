@@ -1,36 +1,108 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import './Navbar.css';
+import React, { useState, useEffect } from 'react';
+import githubIcon from '../assets/github.svg';
+import linkedInIcon from '../assets/linkedin.svg';
 
-const Navbar: React.FC = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
+const navList = [
+  { id: 'home', label: 'Početna' },
+  { id: 'about', label: 'O meni' },
+  { id: 'portfolio', label: 'Portfolio' },
+  { id: 'contact', label: 'Kontakt' },
+];
 
-  const toggleMenu = () => {
-    setIsOpen(!isOpen);
-  };
+interface NavbarProps {
+  darkMode: boolean;
+  toggleDarkMode: () => void;
+}
 
-  const closeMenu = () => {
-    setIsOpen(false);
-  };
+const Navbar: React.FC<NavbarProps> = ({ darkMode, toggleDarkMode }) => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isSmallScreen, setIsSmallScreen] = useState(false);
 
   useEffect(() => {
-    if (menuRef.current) {
-      menuRef.current.style.height = isOpen
-        ? `${menuRef.current.scrollHeight}px`
-        : '0';
+    const mediaQuery = window.matchMedia('(max-width: 1024px)');
+    setIsSmallScreen(mediaQuery.matches);
+
+    const handler = () => setIsSmallScreen(mediaQuery.matches);
+    mediaQuery.addListener(handler);
+
+    return () => mediaQuery.removeListener(handler);
+  }, []);
+
+  const scrollToSection = (sectionId: string) => {
+    const section = document.getElementById(sectionId);
+    if (section) {
+      window.scrollTo({
+        top: section.offsetTop - window.innerHeight * 0.12,
+        behavior: 'smooth',
+      });
     }
-  }, [isOpen]);
+  };
+
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
+
+  const handleItemClick = (sectionId: string) => {
+    scrollToSection(sectionId);
+    setIsMenuOpen(false);
+  };
 
   return (
-    <nav className="p-4 sticky top-0 flex justify-between items-center w-full bg-white border-b-4 gradient-border lg:pl-40 lg:pr-40">
-      <div className="text-2xl font-extrabold bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 inline-block bg-clip-text text-transparent hover:scale-110 transition-transform duration-300 ease-in-out ">
-        <Link className="text-transparent" to="/">
-          Toni Penava
-        </Link>
+    <nav className="bg-dark-crna text-crna dark:bg-bijela dark:text-crna  h-[12vh] w-full sticky top-0 flex items-center justify-evenly z-50 lg:flex lg:justify-evenly bg-opacity-95">
+      <div
+        onClick={() => handleItemClick('home')}
+        className="lg:w-[1/2] w-[1/3] flex items-center justify-start  lg:p-5 cursor-pointer"
+      >
+        <div className="lg:w-[30dvw] text-3xl lg:flex lg:justify-start lg:items-center font-bold bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 inline-block bg-clip-text text-transparent hover:scale-110 transition-transform duration-300 ease-in-out pt-5  ">
+          <h2 className="text-transparent lg:text-start text-center pb-5 ">
+            Toni Penava
+          </h2>
+        </div>
       </div>
-      <div className="md:hidden">
-        <button onClick={toggleMenu} className="text-black focus:outline-none">
+
+      {!isSmallScreen && (
+        <ul className="hidden lg:flex lg:items-center lg:justify-start rounded-b-lg lg:gap-10 text-lg text-zinc-900 bg-zelena opacity-80 lg:bg-transparent pr-5">
+          {navList.map((item) => (
+            <div
+              key={item.id}
+              className="rounded-sm p-2 hover:bg-zinc-50 hover:text-svjetlozelena cursor-pointer font-medium text-center"
+              role="button"
+              onClick={() => handleItemClick(item.id)}
+            >
+              {item.label}
+            </div>
+          ))}
+          <div className="flex items-center gap-4">
+            <a
+              href="https://github.com/tonipenava"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-black dark:text-white block hover:text-orange-400"
+            >
+              <img
+                src={githubIcon}
+                alt="GitHub"
+                className="w-6 h-6 hover:scale-110 transition-all hover:bg-orange-400 hover:rounded-full"
+              />
+            </a>
+            <a
+              href="https://www.linkedin.com/in/toni-penava-28aa08303/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-black dark:text-white block hover:underline"
+            >
+              <img
+                src={linkedInIcon}
+                alt="LinkedIn"
+                className="w-6 h-6 hover:scale-110 transition-all hover:bg-blue-400 hover:rounded-sm"
+              />
+            </a>
+          </div>
+        </ul>
+      )}
+
+      <div className="block lg:hidden pr-4">
+        <button onClick={toggleMenu} className="focus:outline-none">
           <svg
             className="w-6 h-6"
             fill="none"
@@ -42,66 +114,38 @@ const Navbar: React.FC = () => {
               strokeLinecap="round"
               strokeLinejoin="round"
               strokeWidth="2"
-              d={isOpen ? 'M6 18L18 6M6 6l12 12' : 'M4 6h16M4 12h16m-7 6h7'}
-            ></path>
+              d="M4 6h16M4 12h16m-7 6h7"
+            />
           </svg>
         </button>
       </div>
-      <div
-        ref={menuRef}
-        className={`menu md:hidden ${
-          isOpen ? 'menu-visible' : 'menu-hidden'
-        } absolute top-16 left-0 w-full bg-white transition-all duration-300 ease-in-out`}
+
+      {isSmallScreen && (
+        <ul
+          style={{
+            height: isMenuOpen ? '40vh' : '0px',
+            transition: 'height 0.25s ease-in-out',
+            overflow: 'hidden',
+          }}
+          className="lg:hidden text-xl text-zinc-900 bg-bijela opacity-80 w-screen absolute top-[12vh] grid grid-cols-1 grid-rows-5 gap-1"
+        >
+          {navList.map((item) => (
+            <li
+              key={item.id}
+              className="rounded-sm p-2 hover:bg-zinc-50 hover:text-plava font-medium text-center"
+              onClick={() => handleItemClick(item.id)}
+            >
+              {item.label}
+            </li>
+          ))}
+        </ul>
+      )}
+      <button
+        onClick={toggleDarkMode}
+        className="text-black dark:text-white ml-4 p-2 rounded transition-colors duration-300"
       >
-        <ul className="flex flex-col items-center text-center">
-          <li className="w-full">
-            <Link
-              to="/"
-              className="block text-black py-2 hover:underline"
-              onClick={closeMenu}
-            >
-              Home
-            </Link>
-          </li>
-          <li className="w-full">
-            <Link
-              to="/about"
-              className="block text-black py-2 hover:underline"
-              onClick={closeMenu}
-            >
-              About
-            </Link>
-          </li>
-          <li className="w-full">
-            <Link
-              to="/portfolio"
-              className="block text-black py-2 hover:underline"
-              onClick={closeMenu}
-            >
-              Portfolio
-            </Link>
-          </li>
-        </ul>
-      </div>
-      <div className="hidden md:flex md:justify-between md:items-center ">
-        <ul className="flex space-x-4 text-center">
-          <li>
-            <Link to="/" className="text-black block hover:underline">
-              Home
-            </Link>
-          </li>
-          <li>
-            <Link to="/about" className="text-black block hover:underline">
-              About
-            </Link>
-          </li>
-          <li>
-            <Link to="/portfolio" className="text-black block hover:underline">
-              Portfolio
-            </Link>
-          </li>
-        </ul>
-      </div>
+        {darkMode ? '🌞' : '🌜'}
+      </button>
     </nav>
   );
 };
